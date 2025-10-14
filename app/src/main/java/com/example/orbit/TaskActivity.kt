@@ -83,6 +83,7 @@ class TaskActivity : AppCompatActivity() {
             }
             .show()
     }
+// Dans TaskActivity.kt
 
     private fun setupTaskSwipeActions() {
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
@@ -91,38 +92,46 @@ class TaskActivity : AppCompatActivity() {
             override fun onMove(r: RecyclerView, vh: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val task = taskAdapter.currentList[viewHolder.adapterPosition]
+                val position = viewHolder.adapterPosition
+                val task = taskAdapter.currentList[position]
                 when (direction) {
-                    ItemTouchHelper.LEFT -> showDeleteTaskDialog(task)
-                    ItemTouchHelper.RIGHT -> showEditTaskDialog(task)
+                    // On passe la position
+                    ItemTouchHelper.LEFT -> showDeleteTaskDialog(task, position)
+                    ItemTouchHelper.RIGHT -> showEditTaskDialog(task, position)
                 }
             }
         }
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvTasks)
     }
 
-    private fun showDeleteTaskDialog(task: Task) {
+    private fun showDeleteTaskDialog(task: Task, position: Int) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Confirmation de Suppression")
             .setMessage("Voulez-vous vraiment supprimer la tâche \"${task.name}\" ?")
-            .setNegativeButton("Annuler") { _, _ -> loadTasks() }
+            .setNegativeButton("Annuler") { _, _ ->
+                // ✅ LA CORRECTION
+                taskAdapter.notifyItemChanged(position)
+            }
             .setPositiveButton("Supprimer") { _, _ ->
                 lifecycleScope.launch {
                     db.deleteTask(task)
                     loadTasks()
                 }
             }
+            .setCancelable(false)
             .show()
     }
 
-    private fun showEditTaskDialog(task: Task) {
+    private fun showEditTaskDialog(task: Task, position: Int) {
         val editText = EditText(this)
         editText.setText(task.name)
-
         MaterialAlertDialogBuilder(this)
             .setTitle("Modifier la tâche")
             .setView(editText)
-            .setNegativeButton("Annuler") { _, _ -> loadTasks() }
+            .setNegativeButton("Annuler") { _, _ ->
+                // ✅ LA CORRECTION
+                taskAdapter.notifyItemChanged(position)
+            }
             .setPositiveButton("Valider") { _, _ ->
                 val newName = editText.text.toString().trim()
                 if (newName.isNotEmpty()) {
@@ -133,6 +142,7 @@ class TaskActivity : AppCompatActivity() {
                     }
                 }
             }
+            .setCancelable(false)
             .show()
     }
 }

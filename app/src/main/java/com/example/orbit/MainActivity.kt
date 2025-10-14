@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity() {
             loadCategories() // Recharger la liste depuis la DB
         }
     }
+// Dans MainActivity.kt
 
     private fun setupSwipeActions() {
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
@@ -89,38 +90,46 @@ class MainActivity : AppCompatActivity() {
             override fun onMove(r: RecyclerView, vh: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val category = categoryAdapter.currentList[viewHolder.adapterPosition]
+                val position = viewHolder.adapterPosition
+                val category = categoryAdapter.currentList[position]
                 when (direction) {
-                    ItemTouchHelper.LEFT -> showDeleteConfirmationDialog(category)
-                    ItemTouchHelper.RIGHT -> showEditCategoryDialog(category)
+                    // On passe la position en plus de la catégorie
+                    ItemTouchHelper.LEFT -> showDeleteConfirmationDialog(category, position)
+                    ItemTouchHelper.RIGHT -> showEditCategoryDialog(category, position)
                 }
             }
         }
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvCategories)
     }
 
-    private fun showDeleteConfirmationDialog(category: Category) {
+    private fun showDeleteConfirmationDialog(category: Category, position: Int) {
         MaterialAlertDialogBuilder(this)
             .setTitle("Confirmation de Suppression")
             .setMessage("Voulez-vous vraiment supprimer la catégorie \"${category.name}\" ?")
-            .setNegativeButton("Annuler") { _, _ -> loadCategories() }
+            .setNegativeButton("Annuler") { _, _ ->
+                // ✅ LA CORRECTION : On notifie l'adaptateur de redessiner l'élément à sa position
+                categoryAdapter.notifyItemChanged(position)
+            }
             .setPositiveButton("Supprimer") { _, _ ->
                 lifecycleScope.launch {
                     db.deleteCategory(category)
                     loadCategories()
                 }
             }
-            .setCancelable(false)
+            .setCancelable(false) // Empêche la fermeture accidentelle
             .show()
     }
 
-    private fun showEditCategoryDialog(category: Category) {
+    private fun showEditCategoryDialog(category: Category, position: Int) {
         val editText = EditText(this)
         editText.setText(category.name)
         MaterialAlertDialogBuilder(this)
             .setTitle("Modifier le nom")
             .setView(editText)
-            .setNegativeButton("Annuler") { _, _ -> loadCategories() }
+            .setNegativeButton("Annuler") { _, _ ->
+                // ✅ LA CORRECTION : On fait la même chose ici
+                categoryAdapter.notifyItemChanged(position)
+            }
             .setPositiveButton("Valider") { _, _ ->
                 val newName = editText.text.toString().trim()
                 if (newName.isNotEmpty()) {
