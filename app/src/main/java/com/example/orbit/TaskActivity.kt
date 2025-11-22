@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.orbit.databinding.ActivityTaskBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import androidx.core.view.ViewCompat
+import androidx.activity.OnBackPressedCallback
+
 
 class TaskActivity : AppCompatActivity() {
 
@@ -35,17 +38,31 @@ class TaskActivity : AppCompatActivity() {
         binding.tvCategoryNameHeader.text = categoryName
         binding.categoryCardHeader.setCardBackgroundColor(ContextCompat.getColor(this, categoryColorId))
 
+        ViewCompat.setTransitionName(binding.categoryCardHeader, "category_card_$categoryId")
+    
         setupTaskRecyclerView()
         setupTaskSwipeActions()
         loadTasks()
 
         binding.fabBack.setOnClickListener {
-            finish()
+            supportFinishAfterTransition()
         }
 
         binding.fabAddTask.setOnClickListener {
             showAddTaskDialog()
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                supportFinishAfterTransition()
+            }
+        })
+
+        binding.categoryCardHeader.setOnLongClickListener {
+            supportFinishAfterTransition() // On appelle la même action que le bouton retour
+            true // On indique que l'événement de clic long a été géré
+        }
+
     }
 
     private fun setupTaskRecyclerView() {

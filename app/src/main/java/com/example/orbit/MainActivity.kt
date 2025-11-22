@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.orbit.databinding.ActivityMainBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import android.app.ActivityOptions // Importez cette classe
+import android.view.View // Et celle-ci
 
 class MainActivity : AppCompatActivity() {
 
@@ -49,13 +51,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        categoryAdapter = CategoryAdapter { category ->
+        categoryAdapter = CategoryAdapter { category, view ->
             val intent = Intent(this, TaskActivity::class.java).apply {
                 putExtra("EXTRA_CATEGORY_NAME", category.name)
                 putExtra("EXTRA_CATEGORY_COLOR_ID", category.colorResId)
-                putExtra("EXTRA_CATEGORY_ID", category.id) // On passe l'ID pour la DB
+                putExtra("EXTRA_CATEGORY_ID", category.id)
             }
-            startActivity(intent)
+
+            val options = ActivityOptions.makeSceneTransitionAnimation(
+                this,
+                view,
+                ViewCompat.getTransitionName(view)!! // On récupère le nom qu'on a défini
+            )
+
+
+            startActivity(intent, options.toBundle())
         }
 
         binding.rvCategories.apply {

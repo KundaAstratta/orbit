@@ -1,14 +1,17 @@
 package com.example.orbit
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.orbit.databinding.ItemCategoryBinding
 
-class CategoryAdapter(private val onLongClickListener: (Category) -> Unit) :
+// La signature du listener a été mise à jour ici pour accepter une View
+class CategoryAdapter(private val onLongClickListener: (Category, View) -> Unit) :
     ListAdapter<Category, CategoryAdapter.CategoryViewHolder>(CategoryDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
@@ -26,8 +29,13 @@ class CategoryAdapter(private val onLongClickListener: (Category) -> Unit) :
             val color = ContextCompat.getColor(binding.root.context, category.colorResId)
             binding.cardView.setCardBackgroundColor(color)
 
+            // On assigne le nom de transition pour l'animation
+            ViewCompat.setTransitionName(binding.cardView, "category_card_${category.id}")
+
+            // On configure le clic long
             itemView.setOnLongClickListener {
-                onLongClickListener(category)
+                // On passe bien les deux paramètres : la catégorie et la vue cliquée
+                onLongClickListener(category, binding.cardView)
                 true
             }
         }

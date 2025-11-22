@@ -13,6 +13,7 @@
         <item name="colorSecondaryVariant">@color/deep_purple</item>
         <item name="colorOnSecondary">@color/white</item>
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
 </resources>
