@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.orbit"
+    namespace = "com.outer.orbit"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.orbit"
+        applicationId = "com.outer.orbit"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
